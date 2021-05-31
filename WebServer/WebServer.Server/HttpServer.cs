@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using WebServer.Server.Http;
 
 namespace WebServer.Server
 {
@@ -43,8 +44,10 @@ namespace WebServer.Server
                 Console.WriteLine($"Client request with id: {requestId} received:");
                 Console.WriteLine();
 
-                var request = await ReadRequest(networkStream);
-                Console.WriteLine(request);
+                var requestText = await ReadRequest(networkStream);
+                Console.WriteLine(requestText);
+
+                var request = HttpRequest.Parse(requestText);
 
                 Console.WriteLine($"Request with id: {this.requestId} was processed.");
                 Console.WriteLine(new string('-', 50));
@@ -65,9 +68,18 @@ namespace WebServer.Server
             var buffer = new byte[bufferSize];
             var sbRequest = new StringBuilder();
 
+            var totalBytes = 0;
+
             while (networkStream.DataAvailable)
             {
                 var bytesRead = await networkStream.ReadAsync(buffer, 0, bufferSize);
+
+                totalBytes += bytesRead;
+
+                if (totalBytes > 10 * 1024)
+                {
+                    throw new InvalidOperationException("Request is too large!");
+                }
 
                 sbRequest.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
             }
