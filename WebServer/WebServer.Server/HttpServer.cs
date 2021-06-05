@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using WebServer.Server.Http;
+using WebServer.Server.Routing;
 
 namespace WebServer.Server
 {
@@ -14,13 +15,24 @@ namespace WebServer.Server
         private readonly TcpListener listener;
         private int requestId;
 
-        public HttpServer(string ipAddress, int port)
+        public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTable)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
             this.port = port;
 
             this.listener = new TcpListener(this.ipAddress, this.port);
         }
+
+        public HttpServer(int port, Action<IRoutingTable> routingTable) 
+            : this("127.0.0.1", port, routingTable)
+        {
+        }
+
+        public HttpServer(Action<IRoutingTable> routingTable)
+            : this(5000 , routingTable)
+        {
+        }
+
 
         public async Task Start()
         {
@@ -47,14 +59,12 @@ namespace WebServer.Server
                 var requestText = await ReadRequest(networkStream);
                 Console.WriteLine(requestText);
 
-                var request = HttpRequest.Parse(requestText);
+                // var request = HttpRequest.Parse(requestText);
 
                 Console.WriteLine($"Request with id: {this.requestId} was processed.");
                 Console.WriteLine(new string('-', 50));
 
                 await WriteResponse(networkStream);
-
-                await Task.Delay(1);
 
                 connection.Close();
 
@@ -70,7 +80,7 @@ namespace WebServer.Server
 
             var totalBytes = 0;
 
-            while (networkStream.DataAvailable)
+            do
             {
                 var bytesRead = await networkStream.ReadAsync(buffer, 0, bufferSize);
 
@@ -83,6 +93,7 @@ namespace WebServer.Server
 
                 sbRequest.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
             }
+            while (networkStream.DataAvailable);
 
             return sbRequest.ToString();
         }
@@ -98,7 +109,7 @@ namespace WebServer.Server
             sbResponse.AppendLine($"HTTP/1.1 200 OK");
             sbResponse.AppendLine($"Date: {DateTime.UtcNow.ToString("r")}");
             sbResponse.AppendLine($"Server: Web Server");
-            sbResponse.AppendLine($"Content-Type: {contentType}");
+            sbResponse.AppendLine($"Content-Type: text/html; charset=utf-8");
             sbResponse.AppendLine($"Content-Length: {contentLength}");
             sbResponse.AppendLine();
             sbResponse.AppendLine(content);
