@@ -14,13 +14,16 @@ namespace WebServer.Server
         private readonly int port;
         private readonly TcpListener listener;
         private int requestId;
+        private RoutingTable routingTable;
 
-        public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTable)
+        public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguration)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
             this.port = port;
 
             this.listener = new TcpListener(this.ipAddress, this.port);
+
+            routingTableConfiguration(this.routingTable = new RoutingTable());
         }
 
         public HttpServer(int port, Action<IRoutingTable> routingTable) 
@@ -57,14 +60,16 @@ namespace WebServer.Server
                 Console.WriteLine();
 
                 var requestText = await ReadRequest(networkStream);
-                Console.WriteLine(requestText);
+                // Console.WriteLine(requestText);
 
-                // var request = HttpRequest.Parse(requestText);
+                var request = HttpRequest.Parse(requestText);
+
+                var response = this.routingTable.MatchRequest(request);
 
                 Console.WriteLine($"Request with id: {this.requestId} was processed.");
                 Console.WriteLine(new string('-', 50));
 
-                await WriteResponse(networkStream);
+                await WriteResponse(networkStream, response);
 
                 connection.Close();
 
@@ -98,24 +103,9 @@ namespace WebServer.Server
             return sbRequest.ToString();
         }
 
-        private async Task WriteResponse(NetworkStream networkStream)
+        private async Task WriteResponse(NetworkStream networkStream, HttpResponse response)
         {
-            var contentType = @"text/html; charset=utf-8";
-            var content = $"<h1>Hello from the server.</h1><br><h2>Request ID: {this.requestId}</h2>";
-            var contentLength = Encoding.UTF8.GetByteCount(content);
-
-            var sbResponse = new StringBuilder();
-
-            sbResponse.AppendLine($"HTTP/1.1 200 OK");
-            sbResponse.AppendLine($"Date: {DateTime.UtcNow.ToString("r")}");
-            sbResponse.AppendLine($"Server: Web Server");
-            sbResponse.AppendLine($"Content-Type: text/html; charset=utf-8");
-            sbResponse.AppendLine($"Content-Length: {contentLength}");
-            sbResponse.AppendLine();
-            sbResponse.AppendLine(content);
-
-            var response = sbResponse.ToString();
-            var responseBytes = Encoding.UTF8.GetBytes(response);
+            var responseBytes = Encoding.UTF8.GetBytes(response.ToString());
 
             await networkStream.WriteAsync(responseBytes);
         }
