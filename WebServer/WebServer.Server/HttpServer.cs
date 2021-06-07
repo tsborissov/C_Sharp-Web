@@ -64,7 +64,7 @@ namespace WebServer.Server
 
                 var request = HttpRequest.Parse(requestText);
 
-                var response = this.routingTable.MatchRequest(request);
+                var response = this.routingTable.ExecuteRequest(request);
 
                 Console.WriteLine($"Request with id: {this.requestId} was processed.");
                 Console.WriteLine(new string('-', 50));
