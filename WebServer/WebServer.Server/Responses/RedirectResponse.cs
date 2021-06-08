@@ -4,9 +4,10 @@ namespace WebServer.Server.Responses
 {
     public class RedirectResponse : HttpResponse
     {
-        public RedirectResponse(HttpStatusCode statusCode) 
-            : base(statusCode)
+        public RedirectResponse(string location) 
+            : base(HttpStatusCode.Found)
         {
+            this.Headers.Add("Location", location);
         }
     }
 }
