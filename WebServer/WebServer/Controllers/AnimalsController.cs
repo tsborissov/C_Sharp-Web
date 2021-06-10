@@ -27,19 +27,11 @@ namespace WebServer.Controllers
             return Html(result);
         }
 
-        public HttpResponse Dogs()
-        {
-            const string nameKey = "Name";
 
-            var query = this.Request.Query;
+        public HttpResponse Dogs() => View();
 
-            var dogName = query.ContainsKey(nameKey)
-            ? query[nameKey] + " the dog"
-            : "the dogs";
+        public HttpResponse Bunnies() => View("Rabbits");
 
-            var result = $"<h1>Hello from {dogName}.</h1>";
-
-            return Html(result);
-        }
+        public HttpResponse Turtles() => View("Animals/Wild/Turtles");
     }
 }
