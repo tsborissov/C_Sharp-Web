@@ -17,7 +17,7 @@ namespace WebServer.Server.Controllers
         public static IRoutingTable MapPost<TController>(
             this IRoutingTable routingTable,
             string path, 
-            Func<Controller, HttpResponse> controllerFunction)
+            Func<TController, HttpResponse> controllerFunction)
             where TController : Controller
             => routingTable.MapPost(path, request
                 => controllerFunction(CreateController<TController>(request)));
