@@ -1,8 +1,7 @@
-﻿using WebServer.Server;
-using WebServer.Server.Http;
+﻿using WebServer.Models.Animals;
 using WebServer.Server.Controllers;
-using WebServer.Server.Responses;
-using WebServer.Models.Animals;
+using WebServer.Server.Http;
+using WebServer.Server.Results;
 
 namespace WebServer.Controllers
 {
@@ -38,7 +37,12 @@ namespace WebServer.Controllers
         }
 
 
-        public HttpResponse Dogs() => View();
+        public HttpResponse Dogs() => View(new DogViewModel
+        {
+            Name = "Rex",
+            Age = 3,
+            Breed = "Street Perfect"
+        });
 
         public HttpResponse Bunnies() => View("Rabbits");
 

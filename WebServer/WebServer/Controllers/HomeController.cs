@@ -1,7 +1,7 @@
 ﻿using WebServer.Server;
 using WebServer.Server.Http;
 using WebServer.Server.Controllers;
-using WebServer.Server.Responses;
+using WebServer.Server.Results;
 
 namespace WebServer.Controllers
 {

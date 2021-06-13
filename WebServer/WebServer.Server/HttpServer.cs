@@ -47,7 +47,7 @@ namespace WebServer.Server
 
             while (true)
             {
-                Console.Write("Waiting for a connection...");
+                Console.Write("Waiting for connections...");
 
                 var connection = await this.listener.AcceptTcpClientAsync();
 
