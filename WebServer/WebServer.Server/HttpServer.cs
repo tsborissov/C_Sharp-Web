@@ -13,7 +13,6 @@ namespace WebServer.Server
         private readonly IPAddress ipAddress;
         private readonly int port;
         private readonly TcpListener listener;
-        private int requestId;
         private RoutingTable routingTable;
 
         public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguration)
@@ -43,37 +42,35 @@ namespace WebServer.Server
 
             Console.WriteLine($"Server started on {ipAddress}:{port}...");
 
-            this.requestId = 0;
-
             while (true)
             {
                 Console.Write("Waiting for connections...");
 
                 var connection = await this.listener.AcceptTcpClientAsync();
 
-                Console.WriteLine(" -> Connected.");
-                Console.WriteLine();
-
                 var networkStream = connection.GetStream();
                 
-                Console.WriteLine($"Client request with id: {requestId} received:");
-                Console.WriteLine();
-
                 var requestText = await ReadRequest(networkStream);
                 // Console.WriteLine(requestText);
 
-                var request = HttpRequest.Parse(requestText);
+                try
+                {
+                    var request = HttpRequest.Parse(requestText);
 
-                var response = this.routingTable.ExecuteRequest(request);
+                    var response = this.routingTable.ExecuteRequest(request);
 
-                Console.WriteLine($"Request with id: {this.requestId} was processed.");
-                Console.WriteLine(new string('-', 50));
+                    this.LogPipeline(request, response);
 
-                await WriteResponse(networkStream, response);
+                    this.PrepareSession(request, response);
+
+                    await WriteResponse(networkStream, response);
+                }
+                catch (Exception exception)
+                {
+                    await HandleError(networkStream, exception);
+                }
 
                 connection.Close();
-
-                this.requestId++;
             }
         }
 
@@ -101,6 +98,40 @@ namespace WebServer.Server
             while (networkStream.DataAvailable);
 
             return sbRequest.ToString();
+        }
+
+        private void PrepareSession(HttpRequest request, HttpResponse response) 
+            => response.AddCookie(HttpSession.SessionCookieName, request.Session.Id);
+
+        private async Task HandleError(NetworkStream networkStream, Exception exception)
+        {
+            var errorMessage = $"{exception.Message}{Environment.NewLine}{exception.StackTrace}";
+
+            var errorResponse = HttpResponse.ForError(errorMessage);
+
+            await WriteResponse(networkStream, errorResponse);
+        }
+
+        private void LogPipeline(HttpRequest request, HttpResponse response)
+        {
+            var separator = new string('-', 50);
+
+            var log = new StringBuilder();
+            
+            log.AppendLine();
+            log.AppendLine("REQUEST:");
+            log.AppendLine();
+            log.AppendLine(request.ToString());
+
+            log.AppendLine();
+
+            log.AppendLine("RESPONSE:");
+            log.AppendLine();
+            log.AppendLine(response.ToString());
+            log.AppendLine();
+            log.AppendLine(separator);
+
+            Console.WriteLine(log);
         }
 
         private async Task WriteResponse(NetworkStream networkStream, HttpResponse response)

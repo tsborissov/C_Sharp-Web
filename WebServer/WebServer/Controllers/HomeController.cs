@@ -2,6 +2,7 @@
 using WebServer.Server.Http;
 using WebServer.Server.Controllers;
 using WebServer.Server.Results;
+using System;
 
 namespace WebServer.Controllers
 {
@@ -12,13 +13,12 @@ namespace WebServer.Controllers
         {
         }
 
-        public HttpResponse Index()
-            => Text("Hello from this web server.");
+        public HttpResponse Index() => Text("Hello from this web server.");
 
-        public HttpResponse LocalRedirect()
-            => Redirect("/Cats");
+        public HttpResponse LocalRedirect() => Redirect("/Cats");
 
-        public HttpResponse ToSoftUni()
-            => Redirect("https://softuni.bg");
+        public HttpResponse ToSoftUni() => Redirect("https://softuni.bg");
+
+        public HttpResponse Error() => throw new InvalidOperationException("Invalid action!");
     }
 }
