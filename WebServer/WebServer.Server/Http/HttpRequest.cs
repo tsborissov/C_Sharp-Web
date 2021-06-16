@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace WebServer.Server.Http
 {
@@ -60,13 +61,6 @@ namespace WebServer.Server.Http
                 Body = body,
                 Form = form
             };
-        }
-
-        public override string ToString()
-        {
-            // TODO :
-
-            return null;
         }
 
         private static HttpMethod ParseMethod(string method)
@@ -166,7 +160,10 @@ namespace WebServer.Server.Http
 
             if (!Sessions.ContainsKey(sessionId))
             {
-                Sessions[sessionId] = new HttpSession(sessionId);
+                Sessions[sessionId] = new HttpSession(sessionId) 
+                { 
+                    IsNew = true
+                };
             }
 
             return Sessions[sessionId];

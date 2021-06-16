@@ -61,7 +61,7 @@ namespace WebServer.Server
 
                         var response = this.routingTable.ExecuteRequest(request);
 
-                        this.LogPipeline(request, response);
+                        this.LogPipeline(requestText, response.ToString());
 
                         this.PrepareSession(request, response);
 
@@ -103,8 +103,14 @@ namespace WebServer.Server
             return sbRequest.ToString();
         }
 
-        private void PrepareSession(HttpRequest request, HttpResponse response) 
-            => response.AddCookie(HttpSession.SessionCookieName, request.Session.Id);
+        private void PrepareSession(HttpRequest request, HttpResponse response)
+        {
+            if (request.Session.IsNew)
+            {
+                response.AddCookie(HttpSession.SessionCookieName, request.Session.Id);
+                request.Session.IsNew = false;
+            }
+        }
 
         private async Task HandleError(NetworkStream networkStream, Exception exception)
         {
@@ -115,7 +121,7 @@ namespace WebServer.Server
             await WriteResponse(networkStream, errorResponse);
         }
 
-        private void LogPipeline(HttpRequest request, HttpResponse response)
+        private void LogPipeline(string request, string response)
         {
             var separator = new string('-', 50);
 
@@ -124,13 +130,13 @@ namespace WebServer.Server
             log.AppendLine();
             log.AppendLine("REQUEST:");
             log.AppendLine();
-            log.AppendLine(request.ToString());
+            log.AppendLine(request);
 
             log.AppendLine();
 
             log.AppendLine("RESPONSE:");
             log.AppendLine();
-            log.AppendLine(response.ToString());
+            log.AppendLine(response);
             log.AppendLine();
             log.AppendLine(separator);
 
