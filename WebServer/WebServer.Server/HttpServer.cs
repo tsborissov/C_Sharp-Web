@@ -148,6 +148,11 @@ namespace WebServer.Server
             var responseBytes = Encoding.UTF8.GetBytes(response.ToString());
 
             await networkStream.WriteAsync(responseBytes);
+
+            if (response.HasContent)
+            {
+                await networkStream.WriteAsync(response.Content);
+            }
         }
     }
 }
