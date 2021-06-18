@@ -122,7 +122,9 @@ namespace WebServer.Server.Http
                 var headerName = headerParts[0];
                 var headerValue = headerParts[1].Trim();
 
-                headerCollection.Add(headerName, new HttpHeader(headerName, headerValue));
+                var header = new HttpHeader(headerName, headerValue);
+
+                headerCollection[headerName] = header;
             }
 
             return headerCollection;
@@ -132,21 +134,23 @@ namespace WebServer.Server.Http
         {
             var cookieCollection = new Dictionary<string, HttpCookie>();
 
-            //Cookie: My-Second-Cookie=My-Second-Value; My-First-Cookie=My-First-Value
-
             if (headers.ContainsKey(HttpHeader.Cookie))
             {
-                headers[HttpHeader.Cookie]
-                    .Value
-                    .Split(';')
-                    .Select(c => c.Split('='))
-                    .Select(cp => new
-                    {
-                        Name = cp[0].Trim(),
-                        Value = cp[1].Trim()
-                    })
-                    .ToList()
-                    .ForEach(c => cookieCollection.Add(c.Name, new HttpCookie(c.Name, c.Value)));
+                var cookieHeader = headers[HttpHeader.Cookie];
+
+                var allCookies = cookieHeader.Value.Split(';');
+
+                foreach (var cookieText in allCookies)
+                {
+                    var cookieParts = cookieText.Split('=');
+
+                    var cookieName = cookieParts[0].Trim();
+                    var cookieValue = cookieParts[1].Trim();
+
+                    var cookie = new HttpCookie(cookieName, cookieValue);
+
+                    cookieCollection[cookieName] = cookie;
+                }
             }
 
             return cookieCollection;
