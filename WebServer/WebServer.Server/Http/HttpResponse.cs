@@ -19,9 +19,9 @@ namespace WebServer.Server.Http
 
         public HttpStatusCode StatusCode { get; protected set; }
 
-        public IDictionary<string, HttpHeader> Headers { get; } = new Dictionary<string, HttpHeader>();
+        public IDictionary<string, HttpHeader> Headers { get; } = new Dictionary<string, HttpHeader>(StringComparer.InvariantCultureIgnoreCase);
 
-        public IDictionary<string, HttpCookie> Cookies { get; } = new Dictionary<string, HttpCookie>();
+        public IDictionary<string, HttpCookie> Cookies { get; } = new Dictionary<string, HttpCookie>(StringComparer.InvariantCultureIgnoreCase);
 
         public byte[] Content { get; protected set; }
 

@@ -14,7 +14,7 @@ namespace WebServer.Server.Http
             Guard.AgainstNull(id, nameof(id));
 
             this.Id = id;
-            this.data = new();
+            this.data = new Dictionary<string, string>();
         }
 
         public string Id { get; init; }
