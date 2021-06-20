@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web;
 
 namespace WebServer.Server.Http
 {
@@ -87,17 +88,15 @@ namespace WebServer.Server.Http
             return (path, query);
         }
 
-        private static Dictionary<string, string> ParseQuery(string queryString)
-        {
-            return queryString
+        private static Dictionary<string, string> ParseQuery(string queryString) 
+            => HttpUtility.UrlDecode(queryString)
                     .Split('&')
                     .Select(part => part.Split('='))
                     .Where(part => part.Length == 2)
                     .ToDictionary(
                         part => part[0],
-                        part => part[1], 
+                        part => part[1],
                         StringComparer.InvariantCultureIgnoreCase);
-        }
 
         private static Dictionary<string, HttpHeader> ParseHeaders(IEnumerable<string> headerLines)
         {
