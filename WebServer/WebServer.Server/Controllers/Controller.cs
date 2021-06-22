@@ -9,30 +9,37 @@ namespace WebServer.Server.Controllers
     {
         public const string UserSessionKey = "AuthenticatedUserId";
 
-        public Controller(HttpRequest request)
-        {
-            this.Request = request;
-            this.User = this.Request.Session.ContainsKey(UserSessionKey)
-                ? new UserIdentity { Id = this.Request.Session[UserSessionKey] }
-                : new();
-        }
+        private UserIdentity userIdentity;
 
-        protected HttpRequest Request { get; private set; }
+        protected HttpRequest Request { get; init; }
 
         protected HttpResponse Response { get; private init; } = new HttpResponse(HttpStatusCode.OK);
 
-        protected UserIdentity User { get; private set; } 
+        protected UserIdentity User
+        {
+            get
+            {
+                if (this.userIdentity == null)
+                {
+                    this.userIdentity = this.Request.Session.ContainsKey(UserSessionKey)
+                        ? new UserIdentity { Id = this.Request.Session[UserSessionKey] }
+                        : new();
+                }
+
+                return this.userIdentity;
+            }
+        } 
 
         protected void SignIn(string userId)
         {
             this.Request.Session[UserSessionKey] = userId;
-            this.User = new UserIdentity { Id = userId };
+            this.userIdentity = new UserIdentity { Id = userId };
         }
 
         protected void SignOut()
         {
             this.Request.Session.Remove(UserSessionKey);
-            this.User = new UserIdentity();
+            this.userIdentity = new UserIdentity();
         }
 
         protected ActionResult Text(string text)
