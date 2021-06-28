@@ -1,0 +1,22 @@
+﻿<section class="py-5">
+    <div class="container">
+        <h1 style="margin: 2%; text-align: center;">All Trips</h1>
+        <div style="padding: 5%;">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Your request is not valid. Errors:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var error in Model)
+                    {
+                        <tr>
+                            <th scope="row">@error</th>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
